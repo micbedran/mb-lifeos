@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: mb-lifeos
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install && cd ../frontend && npm install && npm run build && cd ..
+    startCommand: cd backend && node db-init.js && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: JWT_SECRET
+        scope: run
+      - key: DATABASE_URL
+        scope: run
+      - key: GOOGLE_CLIENT_ID
+        scope: run
+      - key: GOOGLE_CLIENT_SECRET
+        scope: run
+      - key: GOOGLE_REDIRECT_URI
+        value: https://mb-lifeos.onrender.com/api/auth/google/callback
+      - key: FRONTEND_URL
+        value: https://mb-lifeos.onrender.com
+      - key: ANTHROPIC_API_KEY
+        scope: run
+
+  - type: pserv
+    name: mb-lifeos-db
+    plan: free
+    ipAllowList: []
+    databaseName: mb_lifeos
+    databaseUser: mb_lifeos
