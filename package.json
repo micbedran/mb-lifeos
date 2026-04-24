@@ -1,0 +1,14 @@
+{
+  "name": "mb-lifeos",
+  "version": "1.0.0",
+  "description": "MB LifeOS - Central de gestão de vida",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "db:init": "cd backend && node db-init.js",
+    "deploy": "npm run install:all && npm run build && npm run db:init && npm start"
+  }
+}
