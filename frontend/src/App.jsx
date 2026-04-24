@@ -2793,8 +2793,135 @@ function NewsView({ news, setNews }) {
   );
 }
 
+// ─── Authentication Screen ───
+function AuthScreen({ onLogin }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isRegister, setIsRegister] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      if (isRegister) {
+        await api.register(email, password);
+      }
+      const result = await api.login(email, password);
+      if (result && result.token) {
+        localStorage.setItem("token", result.token);
+        localStorage.setItem("user", JSON.stringify(result.user));
+        onLogin();
+      } else {
+        setError("Falha na autenticação");
+      }
+    } catch (err) {
+      setError(err.message || "Erro ao autenticar");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100vh",
+      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+    }}>
+      <div style={{
+        background: "white",
+        padding: "40px",
+        borderRadius: "10px",
+        boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+        width: "100%",
+        maxWidth: "400px"
+      }}>
+        <h1 style={{ textAlign: "center", marginBottom: "30px", color: "#333" }}>
+          MB LifeOS
+        </h1>
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: "15px" }}>
+            <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>
+              Email:
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{
+                width: "100%",
+                padding: "10px",
+                border: "1px solid #ddd",
+                borderRadius: "5px",
+                boxSizing: "border-box"
+              }}
+            />
+          </div>
+          <div style={{ marginBottom: "15px" }}>
+            <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>
+              Senha:
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={{
+                width: "100%",
+                padding: "10px",
+                border: "1px solid #ddd",
+                borderRadius: "5px",
+                boxSizing: "border-box"
+              }}
+            />
+          </div>
+          {error && <div style={{ color: "red", marginBottom: "15px" }}>{error}</div>}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "10px",
+              background: "#667eea",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+              fontWeight: "bold"
+            }}
+          >
+            {loading ? "Carregando..." : isRegister ? "Registrar" : "Login"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsRegister(!isRegister)}
+            style={{
+              width: "100%",
+              padding: "10px",
+              marginTop: "10px",
+              background: "transparent",
+              color: "#667eea",
+              border: "1px solid #667eea",
+              borderRadius: "5px",
+              cursor: "pointer",
+              fontWeight: "bold"
+            }}
+          >
+            {isRegister ? "Já tem conta? Login" : "Não tem conta? Registre-se"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main App (continued) ───
-export default function PlannerApp() {
+function PlannerApp() {
   const [page, setPage] = useState("home");
   const [date, setDate] = useState(new Date());
   const [tasks, setTasks] = useState([]);
@@ -3171,6 +3298,51 @@ export default function PlannerApp() {
           </div>
         );
       })()}
+    </div>
+  );
+}
+
+// ─── Main App Wrapper with Auth ───
+export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem("token");
+  });
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsAuthenticated(false);
+  };
+
+  if (!isAuthenticated) {
+    return <AuthScreen onLogin={handleLogin} />;
+  }
+
+  return (
+    <div>
+      <PlannerApp />
+      <button
+        onClick={handleLogout}
+        style={{
+          position: "fixed",
+          top: "10px",
+          right: "10px",
+          padding: "8px 16px",
+          background: "#ff6b6b",
+          color: "white",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+          fontSize: "12px",
+          zIndex: 9999
+        }}
+      >
+        Logout
+      </button>
     </div>
   );
 }
