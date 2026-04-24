@@ -37,6 +37,11 @@ function authMiddleware(req, res, next) {
 }
 
 // ─── Auth Routes ───
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { email, password, name } = req.body;
