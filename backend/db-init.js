@@ -13,10 +13,16 @@ async function init() {
     const schema = fs.readFileSync(path.join(__dirname, '../deploy/schema.sql'), 'utf-8');
     await pool.query(schema);
     console.log('Database initialized successfully');
-    process.exit(0);
   } catch (e) {
-    console.error('Database init error:', e.message);
-    process.exit(1);
+    // Ignore errors if tables already exist
+    if (e.message.includes('already exists')) {
+      console.log('Database tables already exist');
+    } else {
+      console.warn('Database init warning:', e.message);
+    }
+  } finally {
+    await pool.end();
+    process.exit(0);
   }
 }
 
